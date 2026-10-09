@@ -7,7 +7,7 @@ node_modules/@cosmosapp/pay_sdk/llms/llms.txt
 node_modules/@cosmosapp/pay_sdk/llms/llms-full.txt
 ```
 
-The server client exposes focused managers for payment intents, webhooks, products, customers, analytics, assets, wallets, addresses, swaps, liquidity pools, fiat ramps, and KYC. Prefer their typed methods over hand-written HTTP requests.
+The server client exposes focused managers for payment intents, webhooks, products, customers, analytics, swaps, liquidity pools, fiat ramps, KYC, activity, and pollar. `Assets`, `Wallets`, and `addresses` are exported helpers, not Client managers. Prefer their typed methods over hand-written HTTP requests.
 
 Apply these rules to value-moving operations:
 
