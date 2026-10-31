@@ -1,6 +1,6 @@
 # Browser wallets
 
-`WebClient` auto-detects supported Stellar wallets. The SDK ships `CosmosWalletAdapter` for the Cosmos Wallet extension and the hosted wallet, so prefer it over a hand-built adapter:
+`WebClient` (from `@cosmosapp/pay_sdk/web`) auto-detects supported Stellar wallets: Freighter, xBull, Rabet, LOBSTR, Albedo and Cosmos Wallet. It is Stellar only: on Solana and Monad the payer opens the intent's Solana Pay or EIP-681 `uri`, or the hosted checkout, in their own wallet. Cosmos Wallet is non-custodial. The SDK ships `CosmosWalletAdapter` for the Cosmos Wallet extension and the hosted wallet, so prefer it over a hand-built adapter:
 
 ```ts
 import { Wallets } from '@cosmosapp/pay_sdk';

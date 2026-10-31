@@ -7,7 +7,15 @@ node_modules/@cosmosapp/pay_sdk/llms/llms.txt
 node_modules/@cosmosapp/pay_sdk/llms/llms-full.txt
 ```
 
+Live docs: https://dev.cosmospay.lat/docs/llms.txt (index) and https://dev.cosmospay.lat/docs/openapi.json (REST spec).
+
 The server client exposes focused managers for payment intents, webhooks, products, customers, analytics, swaps, liquidity pools, fiat ramps, KYC, activity, assets, crossChainSwaps, aliases, plugins, defindex, publicKey, and health. `Wallets` and `addresses` are exported helpers, not Client managers. Prefer their typed methods over hand-written HTTP requests.
+
+Swaps:
+
+- `client.swaps.create({ ... })` with no `chain` (or `chain: 'stellar'`) is a Stellar path payment and returns a `Swap`.
+- `chain: 'solana'` (Jupiter) or `chain: 'monad'` (Kuru Flow) returns a `ChainSwap`. Both are mainnet only and non-custodial: the server builds the transaction, the wallet signs it.
+- `client.crossChainSwaps` swaps between Stellar, Solana and Monad through NEAR Intents: quote, pay the returned deposit address, follow the swap to its outcome. Mainnet only; a `dev` key can list assets and quote but not create.
 
 Apply these rules to value-moving operations:
 
