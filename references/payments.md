@@ -2,7 +2,9 @@
 
 Intents are created on the server with your secret API key. The hosted checkout for every intent is `https://payments.cosmospay.lat/<id>`.
 
-## Stellar with the SDK
+## With the SDK
+
+Stellar is the default chain:
 
 ```ts
 import { Assets, Client, TestnetAssets } from '@cosmosapp/pay_sdk';
@@ -45,9 +47,25 @@ const outcome = await client.paymentIntents.validate(intentId, { txHash });
 if (!outcome.valid) throw new Error(outcome.reason ?? 'Payment validation failed');
 ```
 
-Use `createPay` when the payer chooses the source account. Use `createTx` when the source is already known and the API should return an unsigned XDR. Omitting the asset creates an XLM payment. Omitting the amount creates an open-amount intent; pass the chosen amount to `WebClient.pay`.
+Use `createPay` when the payer chooses the source account. Use `createTx` (Stellar only) when the source is already known and the API should return an unsigned XDR. Omitting the asset creates a payment in the chain's coin (XLM, SOL or MON). Omitting the amount creates an open-amount intent (not on Monad); pass the chosen amount to `WebClient.pay`.
 
-## Solana and Monad with the REST API
+On Solana and Monad, name the chain and give the token by code and issuer (the SPL mint or the ERC-20 contract for your key's network):
+
+```ts
+const intent = await client.paymentIntents.createPay({
+  chain: 'monad',                  // or 'solana'
+  destination: '0x...MERCHANT',    // Solana: a base58 address
+  amount: '25',                    // required on Monad
+  assetCode: 'USDC',
+  assetIssuer: '0x...USDC_CONTRACT',
+});
+intent.chain; // 'monad'
+intent.uri;   // EIP-681 link (Solana: a Solana Pay link)
+```
+
+The payer opens `intent.uri` or `intent.qr` in their own wallet, or the hosted checkout. `WebClient` signing is Stellar only.
+
+## With the REST API
 
 `POST https://api.cosmospay.lat/cosmos-api/v1/payment-intents/pay` with `Authorization: Bearer <apiKey>`. The body takes `chain` (`stellar` by default, `solana` or `monad`), `destination`, `amount`, `assetCode`, `assetIssuer`, `memo`, `msg`, `callback`, `checkoutTheme` and `merchantFee`.
 

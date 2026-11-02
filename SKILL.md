@@ -1,41 +1,44 @@
 ---
 name: cosmospay
-description: Integrate Cosmos Pay, a stablecoin payments API with hosted checkout, payment links, webhooks, swaps and a non-custodial wallet, on Stellar, Solana and Monad. Use when a JavaScript/TypeScript or REST integration must accept crypto or stablecoin (USDC) payments, create payment intents or payment links, embed a pay button or checkout, verify signed webhooks, swap assets on one chain or across chains, or run fiat on/off-ramps. Covers the @cosmosapp/pay_sdk SDK and the Payments REST API.
+description: Integrate Cosmos Pay, a stablecoin payments API with hosted checkout, payment links, webhooks, swaps and a non-custodial wallet, on Stellar, Solana and Monad. Use when a JavaScript/TypeScript or REST integration must accept crypto or stablecoin (USDC) payments, create payment intents or payment links, embed a pay button or checkout, verify signed webhooks, swap assets on one chain or across chains, send USDT0 from Stellar to EVM networks, create private (amount-hidden) payments, or run fiat on/off-ramps. Covers the @cosmosapp/pay_sdk SDK (2.3) and the Payments REST API.
 ---
 
 # Cosmos Pay Integration
 
-[Cosmos Pay](https://cosmospay.lat) is a multi-chain payments gateway for Stellar, Solana and Monad. You create a payment intent on your server, the payer completes it from their own wallet, and you confirm it on-chain. Around that core it offers a hosted checkout and payment links, signed webhooks, same-chain and cross-chain swaps, fiat on/off-ramps, products, customers, analytics and a non-custodial Cosmos Wallet.
+[Cosmos Pay](https://cosmospay.lat) is a multi-chain payments gateway for Stellar, Solana and Monad. You create a payment intent on your server, the payer completes it from their own wallet, and you confirm it on-chain. Around that core it offers a hosted checkout and payment links, signed webhooks, same-chain and cross-chain swaps, USDT0 transfers to EVM networks, private payments, fiat on/off-ramps, products, customers, analytics and a non-custodial Cosmos Pay Wallet.
 
 ## Sources of truth
 
 - Docs: https://dev.cosmospay.lat/docs
-- Docs index for agents: https://dev.cosmospay.lat/docs/llms.txt
+- Docs index for agents: https://dev.cosmospay.lat/docs/llms.txt (only the SDK: `/docs/llms-sdk.txt`; only the REST API: `/docs/llms-api.txt`)
 - OpenAPI spec: https://dev.cosmospay.lat/docs/openapi.json
-- Any docs page as Markdown: `https://dev.cosmospay.lat/docs/llms.mdx/<path>/content.md` (for example `sdk/server/quickstart`)
+- Any docs page as Markdown: add `.md` to its path, for example https://dev.cosmospay.lat/docs/sdk/server/quickstart.md
 - SDK on npm: [`@cosmosapp/pay_sdk`](https://www.npmjs.com/package/@cosmosapp/pay_sdk); version-matched guides ship inside it at `node_modules/@cosmosapp/pay_sdk/llms/llms-full.txt`
 - SDK source and runnable examples: https://github.com/CosmosPay/CosmosJS_SDK
 
-When this skill and the live docs or OpenAPI spec disagree, the spec wins.
+This skill matches `@cosmosapp/pay_sdk` 2.3. When it and the live docs or OpenAPI spec disagree, the spec wins.
 
 ## What is supported per chain
 
 | Capability | Stellar | Solana | Monad |
 | --- | --- | --- | --- |
-| Payment intents (payer link + QR) | SDK and REST (SEP-7) | REST with `chain: "solana"` (Solana Pay) | REST with `chain: "monad"` (EIP-681) |
-| Browser wallet signing (`WebClient`) | Freighter, xBull, Rabet, LOBSTR, Albedo, Cosmos Wallet | payer pays the link from any Solana wallet | payer pays the link from any Monad wallet |
+| Payment links (`pay` intents: payer link + QR) | SDK and REST (SEP-7) | SDK and REST with `chain: 'solana'` (Solana Pay) | SDK and REST with `chain: 'monad'` (EIP-681) |
+| `tx` intents (unsigned XDR for a known payer) | SDK and REST | | |
+| Browser wallet signing (`WebClient`) | Freighter, xBull, Rabet, LOBSTR, Albedo, Cosmos Pay Wallet | payer pays the link from any Solana wallet | payer pays the link from any Monad wallet |
 | Same-chain swaps (`client.swaps`) | Stellar DEX path payment | Jupiter (mainnet only) | Kuru Flow (mainnet only) |
 | Cross-chain swaps (`client.crossChainSwaps`) | NEAR Intents between all three chains (mainnet only) | | |
+| USDT0 to EVM networks (`client.usdt0`) | LayerZero OFT from Stellar (mainnet only) | | |
+| Private payments (`client.privatePayments`) | amount hidden on-chain (Stellar testnet only for now) | | |
 
-Today `client.paymentIntents` creates Stellar SEP-7 intents. For Solana and Monad intents call the REST endpoint with `chain` (see [references/payments.md](references/payments.md)). Webhooks, validation and the hosted checkout work the same on every chain.
+`client.paymentIntents.createPay` takes `chain` (`'stellar'` by default, `'solana'` or `'monad'`); `createTx` is Stellar only. Webhooks, validation and the hosted checkout work the same on every chain.
 
 ## Choose the flow
 
 | Need | Read |
 | --- | --- |
 | Create and settle a checkout or payment link on any chain | [references/payments.md](references/payments.md) |
-| Connect Cosmos Wallet or another Stellar browser wallet | [references/wallets.md](references/wallets.md) |
-| Swaps, liquidity, ramps, KYC, or other managers | [references/operations.md](references/operations.md) |
+| Connect Cosmos Pay Wallet or another Stellar browser wallet | [references/wallets.md](references/wallets.md) |
+| Swaps, USDT0, private payments, liquidity, ramps, KYC, or other managers | [references/operations.md](references/operations.md) |
 
 ## Install and authenticate
 
@@ -64,7 +67,7 @@ The REST API lives under `https://api.cosmospay.lat/cosmos-api/v1` and takes `Au
 
 ## The payment flow
 
-1. Your server creates an intent: `client.paymentIntents.createPay({ destination, amount, asset, msg })` (Stellar) or `POST /v1/payment-intents/pay` with `chain` (any chain). The response carries `uri` and `qr`.
+1. Your server creates an intent: `client.paymentIntents.createPay({ chain, destination, amount, asset, msg })` or `POST /v1/payment-intents/pay` with `chain`. The response carries `uri` and `qr`.
 2. The payer pays from their wallet. On Stellar in the browser, `await new WebClient().pay(intent)` from `@cosmosapp/pay_sdk/web` returns `txHash`. Every intent also has a hosted checkout at `https://payments.cosmospay.lat/<intent id>`, or you can embed it with `<cosmos-pay-button link="<id>">` or `<cosmos-pay-checkout link="<id>">` after loading `https://payments.cosmospay.lat/embed/cosmos-pay.js` (no API key in the page).
 3. Your server confirms it: `client.paymentIntents.validate(id, { txHash })` (or `POST /v1/payment-intents/{id}/validate`), or reacts to a signed webhook.
 
@@ -80,6 +83,16 @@ const intent = await client.paymentIntents.createPay({
 });
 intent.uri; // web+stellar:pay?destination=...
 intent.qr;  // data:image/png;base64,...
+
+// Solana (Monad: chain 'monad', a 0x... destination and an ERC-20 contract)
+const sol = await client.paymentIntents.createPay({
+  chain: 'solana',
+  destination: '<merchant Solana address>',
+  amount: '10',            // required on Monad
+  assetCode: 'USDC',
+  assetIssuer: '<USDC SPL mint for your key network>',
+});
+sol.uri; // solana:...
 ```
 
 ## Webhooks
@@ -111,11 +124,11 @@ app.post('/hooks/cosmos', express.raw({ type: '*/*' }), (req, res) => { // MUST 
 });
 ```
 
-Raw event types include `PAYMENT_INTENT_SUCCEEDED`, `PAYMENT_INTENT_FAILED`, `SWAP_SUCCEEDED`, `PAYIN_COMPLETED`, `PAYOUT_COMPLETED` and `CROSS_CHAIN_SWAP_SUCCEEDED`. Omit `eventTypes` to receive all events. Without Express: `createServer(client.webhooks.createHandler()).listen(4242)`.
+`WebhookEventType` lists all 30 event types: payment intents (`PAYMENT_INTENT_SUCCEEDED`, `PAYMENT_INTENT_FAILED`, ...), private payments (`ZK_PAYMENT_SUCCEEDED`), same-chain swaps, cross-chain swaps, liquidity and fiat ramps (`PAYIN_COMPLETED`, `PAYOUT_COMPLETED`, ...). Omit `eventTypes` to receive all events. `SWAP_EXPIRED` and `LIQUIDITY_EXPIRED` are not final: a late transaction can still produce `SWAP_SUCCEEDED` or `LIQUIDITY_SUCCEEDED`. Without Express: `createServer(client.webhooks.createHandler()).listen(4242)`.
 
 ## Beyond payments
 
-The same `client` exposes `swaps`, `crossChainSwaps`, `liquidity`, `onramp`, `offramp`, `kyc`, `products`, `customers`, `analytics`, `assets`, `aliases` and more. See [references/operations.md](references/operations.md), and read the docs page before writing code against a ramp or swap.
+The same `client` exposes `swaps`, `crossChainSwaps`, `usdt0`, `privatePayments`, `liquidity`, `onramp`, `offramp`, `kyc`, `products`, `customers`, `analytics`, `assets`, `aliases` and more. See [references/operations.md](references/operations.md), and read the docs page before writing code against a ramp, swap or transfer.
 
 ## Apply the security boundary
 

@@ -9,9 +9,11 @@ Once installed, an agent loads it when you ask for things like accepting USDC pa
 | Path | What it covers |
 | --- | --- |
 | `SKILL.md` | Overview, per-chain support, auth and the key-prefix network rule, payment flow, webhooks, security rules |
-| `references/payments.md` | Stellar intents with the SDK, Solana and Monad intents with the REST API, hosted checkout and embeds |
-| `references/wallets.md` | Browser wallets and the Cosmos Wallet adapter (Stellar) |
-| `references/operations.md` | Swaps (same-chain and cross-chain), liquidity, ramps, KYC and other managers |
+| `references/payments.md` | Payment intents on Stellar, Solana and Monad with the SDK or the REST API, hosted checkout and embeds |
+| `references/wallets.md` | Browser wallets and the Cosmos Pay Wallet adapter (Stellar) |
+| `references/operations.md` | Swaps (same-chain and cross-chain), USDT0, private payments, liquidity, ramps, KYC and other managers |
+
+It matches `@cosmosapp/pay_sdk` 2.3.
 
 ## Install
 
