@@ -1,6 +1,6 @@
 # Browser wallets
 
-`WebClient` (from `@cosmosapp/pay_sdk/web`) auto-detects supported Stellar wallets: Freighter, xBull, Rabet, LOBSTR, Albedo and Cosmos Wallet. It is Stellar only: on Solana and Monad the payer opens the intent's Solana Pay or EIP-681 `uri`, or the hosted checkout, in their own wallet. Cosmos Wallet is non-custodial. The SDK ships `CosmosWalletAdapter` for the Cosmos Wallet extension and the hosted wallet, so prefer it over a hand-built adapter:
+`WebClient` (from `@cosmosapp/pay_sdk/web`) auto-detects supported Stellar wallets: Freighter, xBull, Rabet, LOBSTR, Albedo and Cosmos Pay Wallet. It is Stellar only: on Solana and Monad the payer opens the intent's Solana Pay or EIP-681 `uri`, or the hosted checkout, in their own wallet. Cosmos Pay Wallet is non-custodial. The SDK ships `CosmosWalletAdapter` for the Cosmos Pay Wallet extension and the hosted wallet, so prefer it over a hand-built adapter:
 
 ```ts
 import { Wallets } from '@cosmosapp/pay_sdk';
@@ -14,6 +14,6 @@ const payment = await webClient.pay(intentPayload);
 
 The shipped adapter registers by default, covers the extension and the hosted wallet (`new WebClient({ cosmos: { walletUrl } })`), and reads its provider live in `isAvailable()`.
 
-On the hosted Cosmos Wallet, load its provider script before constructing the client. When the browser extension is installed it supplies the same `window.cosmosWallet` interface and takes precedence.
+On the hosted Cosmos Pay Wallet, load its provider script before constructing the client. When the browser extension is installed it supplies the same `window.cosmosWallet` interface and takes precedence.
 
 Never sign an opaque XDR silently. Keep the wallet's approval screen in the flow and show the decoded destination, asset, amount, memo, fee, network, and validity window.
