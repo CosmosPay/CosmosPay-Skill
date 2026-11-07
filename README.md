@@ -1,3 +1,7 @@
+<p align="center">
+  <a href="https://dev.cosmospay.lat/docs/ai/"><img src=".github/assets/banner.png" width="100%" alt="Cosmos Pay agent skill: teaches AI coding agents to integrate Cosmos Pay."></a>
+</p>
+
 # Cosmos Pay agent skill
 
 An agent skill that teaches AI coding agents to integrate [Cosmos Pay](https://cosmospay.lat): a stablecoin payments API with hosted checkout, payment links, webhooks, swaps and a non-custodial wallet, with payments on Stellar, Solana and Monad.
